@@ -1,0 +1,68 @@
+# Importing necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, r2_score
+
+# Step 1: Create a simple dataset
+data = {
+    'Temperature (°C)': [25, 18, 30, 22, 24, 20, 28, 27, 23, 19],
+    'Humidity (%)': [60, 80, 50, 70, 65, 75, 55, 68, 72, 85],
+    'Storage Method': ['Refrigerated', 'Refrigerated', 'Ambient', 'Ambient', 
+                       'Refrigerated', 'Refrigerated', 'Ambient', 'Ambient', 
+                       'Refrigerated', 'Refrigerated'],
+    'Ripeness Level': ['Unripe', 'Ripe', 'Overripe', 'Ripe', 'Unripe', 
+                       'Overripe', 'Ripe', 'Unripe', 'Overripe', 'Ripe'],
+    'Shelf Life (Days)': [14, 10, 3, 7, 12, 4, 5, 9, 3, 8]
+}
+df = pd.DataFrame(data)
+
+
+
+# Step 2: Preprocess the data
+# Convert categorical data to numeric
+df['Storage Method'] = df['Storage Method'].map({'Refrigerated': 1, 'Ambient': 0})
+df['Ripeness Level'] = df['Ripeness Level'].map({'Unripe': 0, 'Ripe': 1, 'Overripe': 2})
+
+# Split the dataset into features (X) and target (y)
+X = df[['Temperature (°C)', 'Humidity (%)', 'Storage Method', 'Ripeness Level']]
+y = df['Shelf Life (Days)']
+
+# Step 3: Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Step 4: Train a Linear Regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Step 5: Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Step 6: Evaluate the model
+mae = mean_absolute_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"Mean Absolute Error (MAE): {mae}")
+print(f"R² Score: {r2}")
+
+# Step 7: Visualize Actual vs Predicted shelf life
+plt.scatter(y_test, y_pred, color='blue', label='Predicted')
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linestyle='--', label='Perfect Prediction')
+plt.xlabel('Actual Shelf Life (Days)')
+plt.ylabel('Predicted Shelf Life (Days)')
+plt.title('Actual vs Predicted Shelf Life')
+plt.legend()
+plt.show()
+
+# Step 8: Predict shelf life for new data
+new_data = pd.DataFrame({
+    'Temperature (°C)': [21],
+    'Humidity (%)': [65],
+    'Storage Method': [1],  # 1 = Refrigerated
+    'Ripeness Level': [1]   # 1 = Ripe
+})
+new_prediction = model.predict(new_data)
+print(f"Predicted Shelf Life for the new data: {new_prediction[0]:.2f} days")
